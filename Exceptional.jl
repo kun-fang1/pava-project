@@ -1,6 +1,11 @@
+# To delete later
 struct DivisionByZero <: Exception end
 struct LineEndLimit <: Exception end
 
+# Constants
+const HANDLERS = []
+
+# Functions
 # to_escape function
 function to_escape(func)
     try
@@ -12,6 +17,9 @@ end
 
 # handling function
 function handling(func, handlers...)
+    n = length(handlers)
+    append!(HANDLERS, handlers)
+
     try
         func()
     catch e
@@ -22,6 +30,10 @@ function handling(func, handlers...)
             end
         end
         rethrow()  
+    finally
+        for _ in 1:n
+            pop!(HANDLERS)
+        end
     end
 end
 
@@ -53,7 +65,12 @@ end
 
 # signal function
 function signal(exception)
-    println("Signaling exception: ", exception)
+    for (exception_type, handler) in HANDLERS
+        if isa(exception, exception_type)
+            handler(exception)
+            break
+        end
+    end
 end
 
 # error function
