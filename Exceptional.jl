@@ -25,11 +25,12 @@ end
 function handling(func, handlers...)
     append!(HANDLERS, handlers)
     try
-        return func()
+        func()
     catch e
         for (exception_type, handler) in handlers
             if isa(e, exception_type)
-                return handler(e)
+                handler(e)
+                break
             end
         end
         rethrow()
