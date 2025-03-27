@@ -13,12 +13,12 @@ end
 function to_escape(func)
     escaped_value = nothing
     try
-        return func(x -> begin
+        func(x -> begin
             escaped_value = x
             throw(:escaped)
         end)
     catch
-        return escaped_value
+        escaped_value
     end
 end
 
@@ -29,7 +29,15 @@ function handling(func, handlers...)
     catch e
         for (exception_type, handler) in handlers
             if isa(e, exception_type)
-                handler(e)
+                try
+                    handler(e)
+                catch e
+                    if isa(e, RestartException)
+                        return e.value
+                    else
+                        rethrow()
+                    end
+                end
                 break
             end
         end
@@ -43,14 +51,7 @@ end
 
 function with_restart(func, restarts...)
     push!(RESTARTS, Dict{Symbol,Function}(restarts...))
-    try
-        return func()
-    catch e
-        if isa(e, RestartException)
-            return e.value
-        end
-        rethrow()
-    end
+    func()
 end
 
 function available_restart(name)
@@ -63,9 +64,10 @@ function available_restart(name)
 end
 
 function invoke_restart(name, args...)
+    println("invoke_restart $name $args")
     for restart in RESTARTS
         if haskey(restart, name)
-            return restart[name](args...)
+            throw(RestartException(name, args, restart[name](args...)))
         end
     end
 end
@@ -73,7 +75,7 @@ end
 function signal(exception)
     for (exception_type, handler) in HANDLERS
         if isa(exception, exception_type)
-            return handler(exception)
+            handler(exception)
         end
     end
 end
