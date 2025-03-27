@@ -64,7 +64,6 @@ function available_restart(name)
 end
 
 function invoke_restart(name, args...)
-    println("invoke_restart $name $args")
     for restart in RESTARTS
         if haskey(restart, name)
             throw(RestartException(name, args, restart[name](args...)))
