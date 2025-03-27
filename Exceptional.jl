@@ -72,7 +72,7 @@ function invoke_restart(name, args...)
 end
 
 function signal(exception)
-    for (exception_type, handler) in HANDLERS
+    for (exception_type, handler) in reverse(HANDLERS)
         if isa(exception, exception_type)
             handler(exception)
         end
