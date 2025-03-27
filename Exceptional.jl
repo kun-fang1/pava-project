@@ -1,32 +1,22 @@
 # Constants
 const HANDLERS = []
 
-# Macros
-macro to_escape_impl(func)
-    escape = gensym()
-
-    quote
-        has_escaped = false
-        escaped_value = nothing
-
-        $escape = x -> begin
-            has_escaped = true
-            escaped_value = x
-        end
-
-        try
-            result = $(esc(func))($escape)
-            return has_escaped ? escaped_value : result
-        catch
-            return escaped_value
-        end
-    end
-end
-
 # Functions
 # to_escape function
+# Functions
 function to_escape(func)
-    @to_escape_impl func
+    escaped_value = nothing
+
+    escape = x -> begin
+        escaped_value = x
+        throw(:escaped)
+    end
+
+    try
+        func(escape)
+    catch
+        escaped_value
+    end
 end
 
 # handling function
