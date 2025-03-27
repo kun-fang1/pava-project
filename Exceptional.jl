@@ -1,35 +1,35 @@
 # Constants
 const HANDLERS = []
+const RESTARTS = []
 
-# Functions
-# to_escape function
+# Exceptions
+struct RestartException <: Exception
+    name::Symbol
+    args::Tuple
+    value
+end
+
 # Functions
 function to_escape(func)
     escaped_value = nothing
-
-    escape = x -> begin
-        escaped_value = x
-        throw(:escaped)
-    end
-
     try
-        func(escape)
+        return func(x -> begin
+            escaped_value = x
+            throw(:escaped)
+        end)
     catch
-        escaped_value
+        return escaped_value
     end
 end
 
-# handling function
 function handling(func, handlers...)
     append!(HANDLERS, handlers)
-
     try
-        func()
+        return func()
     catch e
         for (exception_type, handler) in handlers
             if isa(e, exception_type)
-                handler(e)
-                break
+                return handler(e)
             end
         end
         rethrow()
@@ -40,43 +40,43 @@ function handling(func, handlers...)
     end
 end
 
-# with_restart function
 function with_restart(func, restarts...)
+    push!(RESTARTS, Dict{Symbol,Function}(restarts...))
     try
-        func()
+        return func()
     catch e
-        for (restart_name, restart_func) in restarts
-            if available_restart(restart_name)
-                return restart_func()
-            end
+        if isa(e, RestartException)
+            return e.value
         end
         rethrow()
     end
 end
 
-# available_restart function
 function available_restart(name)
-    # Here you can implement specific logic as needed
-    true
+    for restart in RESTARTS
+        if haskey(restart, name)
+            return true
+        end
+    end
+    return false
 end
 
-# invoke_restart function
 function invoke_restart(name, args...)
-    # Here you can implement specific logic as needed
-    println("Invoking restart: ", name)
-end
-
-# signal function
-function signal(exception)
-    for (exception_type, handler) in HANDLERS
-        if isa(exception, exception_type)
-            handler(exception)
-            break
+    for restart in RESTARTS
+        if haskey(restart, name)
+            return restart[name](args...)
         end
     end
 end
 
-# error function
+function signal(exception)
+    for (exception_type, handler) in HANDLERS
+        if isa(exception, exception_type)
+            return handler(exception)
+        end
+    end
+end
+
 function error(exception)
     throw(exception)
 end
