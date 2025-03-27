@@ -3,20 +3,20 @@ const HANDLERS = []
 
 # Macros
 macro to_escape_impl(func)
-    esc_name = gensym(:esc)
+    escape = gensym()
 
     quote
-        escaped = false
+        has_escaped = false
         escaped_value = nothing
 
-        $esc_name = x -> begin
-            escaped = true
+        $escape = x -> begin
+            has_escaped = true
             escaped_value = x
         end
 
         try
-            result = $(esc(func))($esc_name)
-            return escaped ? escaped_value : result
+            result = $(esc(func))($escape)
+            return has_escaped ? escaped_value : result
         catch
             return escaped_value
         end
