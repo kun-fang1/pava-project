@@ -1,23 +1,36 @@
-# To delete later
-struct DivisionByZero <: Exception end
-struct LineEndLimit <: Exception end
-
 # Constants
 const HANDLERS = []
+
+# Macros
+macro to_escape_impl(func)
+    esc_name = gensym(:esc)
+
+    quote
+        escaped = false
+        escaped_value = nothing
+
+        $esc_name = x -> begin
+            escaped = true
+            escaped_value = x
+        end
+
+        try
+            result = $(esc(func))($esc_name)
+            return escaped ? escaped_value : result
+        catch
+            return escaped_value
+        end
+    end
+end
 
 # Functions
 # to_escape function
 function to_escape(func)
-    try
-        func()
-    catch e
-        println("Escaped with exception: ", e)
-    end
+    @to_escape_impl func
 end
 
 # handling function
 function handling(func, handlers...)
-    n = length(handlers)
     append!(HANDLERS, handlers)
 
     try
@@ -29,9 +42,9 @@ function handling(func, handlers...)
                 break
             end
         end
-        rethrow()  
+        rethrow()
     finally
-        for _ in 1:n
+        for _ in 1:length(handlers)
             pop!(HANDLERS)
         end
     end
@@ -47,7 +60,7 @@ function with_restart(func, restarts...)
                 return restart_func()
             end
         end
-        rethrow()  
+        rethrow()
     end
 end
 
@@ -77,6 +90,3 @@ end
 function error(exception)
     throw(exception)
 end
-
-
-
