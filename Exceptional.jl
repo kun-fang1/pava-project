@@ -6,17 +6,14 @@ const RESTARTS = []
 function to_escape(func)
     escaped_value = nothing
     try
-        func(x -> begin
-            escaped_value = x
-            throw(:escaped)
-        end)
+        func((x) -> (escaped_value = x; throw(:escaped)))
     catch
         escaped_value
     end
 end
 
 function handling(func, handlers...)
-    append!(HANDLERS, handlers)
+    insert!(HANDLERS, 1, handlers)
     try
         return func()
     catch e
@@ -38,7 +35,7 @@ function handling(func, handlers...)
 end
 
 function with_restart(func, restarts...)
-    push!(RESTARTS, Dict{Symbol,Function}(restarts...))
+    insert!(RESTARTS, 1, Dict{Symbol,Function}(restarts...))
     return func()
 end
 
@@ -60,7 +57,7 @@ function invoke_restart(name, args...)
 end
 
 function signal(exception)
-    for (exception_type, handler) in reverse(HANDLERS)
+    for (exception_type, handler) in HANDLERS
         if isa(exception, exception_type)
             handler(exception)
         end
