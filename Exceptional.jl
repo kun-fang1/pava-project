@@ -2,13 +2,6 @@
 const HANDLERS = []
 const RESTARTS = []
 
-# Exceptions
-struct RestartException <: Exception
-    name::Symbol
-    args::Tuple
-    value
-end
-
 # Functions
 function to_escape(func)
     escaped_value = nothing
@@ -25,18 +18,13 @@ end
 function handling(func, handlers...)
     append!(HANDLERS, handlers)
     try
-        func()
+        return func()
     catch e
         for (exception_type, handler) in handlers
             if isa(e, exception_type)
-                try
-                    handler(e)
-                catch e
-                    if isa(e, RestartException)
-                        return e.value
-                    else
-                        rethrow()
-                    end
+                result = handler(e)
+                if result !== nothing
+                    return result
                 end
                 break
             end
@@ -51,7 +39,7 @@ end
 
 function with_restart(func, restarts...)
     push!(RESTARTS, Dict{Symbol,Function}(restarts...))
-    func()
+    return func()
 end
 
 function available_restart(name)
@@ -66,7 +54,7 @@ end
 function invoke_restart(name, args...)
     for restart in RESTARTS
         if haskey(restart, name)
-            throw(RestartException(name, args, restart[name](args...)))
+            return restart[name](args...)
         end
     end
 end
