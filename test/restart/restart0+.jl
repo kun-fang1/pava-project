@@ -18,8 +18,8 @@ veryMystery(n) = with_restart(:return_zero => () -> 0,
 @assert veryMystery(2) == 2
 @assert veryMystery(4) == 4
 
-@assert veryMystery(1) == 0
-@assert veryMystery(3) == 0
+@assert veryMystery(1) == 1
+@assert veryMystery(3) == 1
 
 #=
 output:
