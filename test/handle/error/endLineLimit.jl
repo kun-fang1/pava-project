@@ -27,4 +27,5 @@ end
 #=
 output:
 Hi, everybody! How a
+(ERROR: LoadError: LineEndLimit())
 =#

@@ -23,4 +23,5 @@ end
 output:
 I saw a division by zero
 I saw it too
+(ERROR: LoadError: DivisionByZero())
 =#

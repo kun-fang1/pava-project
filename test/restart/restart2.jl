@@ -21,6 +21,5 @@ a1 = handling(DivisionByZero => (c) -> (println("I saw it too"))) do
 #=
 output:
 I saw a DivisionByZero
-I saw it too
 =#
 
