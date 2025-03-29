@@ -1,6 +1,7 @@
 include("../../../Exceptional.jl")
 
 struct LineEndLimit <: Exception end
+struct EndText <: Exception end
 
 print_line(str, line_end=20) =
     let col = 0
@@ -12,14 +13,17 @@ print_line(str, line_end=20) =
             col = 0
         end
     end
+    signal(EndText())
 end
 
-handling(LineEndLimit => (c) -> println()) do
+handling(LineEndLimit => (c) -> println(),
+            EndText => (c) -> println("END!")) do
     print_line("Hi, everybody! How are you feeling today?\n")
 end
 
 to_escape() do exit
-    handling(LineEndLimit => (c) -> exit()) do
+    handling(LineEndLimit => (c) -> exit(),
+                EndText => (c) -> println("END!")) do
         print_line("Hi, everybody! How are you feeling today?\n")
     end
 end
@@ -29,4 +33,5 @@ output:
 Hi, everybody! How a
 re you feeling today
 ?
+END!
 Hi, everybody! How a=#
