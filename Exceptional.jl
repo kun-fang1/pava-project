@@ -1,6 +1,6 @@
 # Constants
-const HANDLERS = []
-const RESTARTS = []
+const HANDLERS_LIST = [] # FIFO: list of lists
+const RESTARTS_LIST = [] # FIFO: list of lists
 
 # Functions
 function to_escape(func)
@@ -13,12 +13,12 @@ function to_escape(func)
 end
 
 function handling(func, handlers...)
-    insert!(HANDLERS, 1, handlers)
+    pushfirst!(HANDLERS_LIST, handlers)
     try
         return func()
     catch e
-        for (exception_type, handler) in handlers
-            if isa(e, exception_type)
+        for (e_type, handler) in handlers
+            if isa(e, e_type)
                 result = handler(e)
                 if result !== nothing
                     return result
@@ -28,38 +28,44 @@ function handling(func, handlers...)
         end
         rethrow()
     finally
-        for _ in 1:length(handlers)
-            pop!(HANDLERS)
-        end
+        popfirst!(HANDLERS_LIST)
     end
 end
 
 function with_restart(func, restarts...)
-    insert!(RESTARTS, 1, Dict{Symbol,Function}(restarts...))
-    return func()
+    pushfirst!(RESTARTS_LIST, restarts)
+    ret = func()
+    popfirst!(RESTARTS_LIST)
+    return ret
 end
 
 function available_restart(name)
-    for restart in RESTARTS
-        if haskey(restart, name)
-            return true
+    for restarts in RESTARTS_LIST
+        for (token, func) in restarts
+            if token == name
+                return true
+            end
         end
     end
     return false
 end
 
 function invoke_restart(name, args...)
-    for restart in RESTARTS
-        if haskey(restart, name)
-            return restart[name](args...)
+    for restarts in RESTARTS_LIST
+        for (token, func) in restarts
+            if token == name
+                return func(args...)
+            end
         end
     end
 end
 
 function signal(exception)
-    for (exception_type, handler) in HANDLERS
-        if isa(exception, exception_type)
-            handler(exception)
+    for handlers in HANDLERS_LIST
+        for (e_type, func) in handlers
+            if isa(exception, e_type)
+                func(exception)
+            end
         end
     end
 end
