@@ -15,9 +15,9 @@ chain(n) = 1 +
             1
         end
     
-foo(n) = handling(ExcTwo => (c)->invoke_restart(:try_again, 3)) do
-            handling(ExcOne => (c)->invoke_restart(:try_again, 2)) do
-                handling(ExcZero => (c)->invoke_restart(:try_again, 1)) do
+foo(n) = handling(ExcTwo => (c) -> invoke_restart(:try_again, 3)) do
+            handling(ExcOne => (c) -> invoke_restart(:try_again, 2)) do
+                handling(ExcZero => (c) -> invoke_restart(:try_again, 1)) do
                         with_restart(:return_zero => () -> 0,
                             :return_value => identity,
                             :try_again => chain,

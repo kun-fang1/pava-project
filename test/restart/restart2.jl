@@ -9,9 +9,9 @@ reciprocal(value) =
         value == 0 ? error(DivisionByZero()) : 1/value
     end
 
-a1 = handling(DivisionByZero => (c) -> (println("I saw it too"))) do 
-        handling(DivisionByZero => (c) -> (invoke_restart(:return_zero))) do
-            handling(DivisionByZero => (c) -> (println("I saw a DivisionByZero"))) do
+a1 = handling(DivisionByZero => (c) -> println("I saw it too")) do 
+        handling(DivisionByZero => (c) -> invoke_restart(:return_zero)) do
+            handling(DivisionByZero => (c) -> println("I saw a DivisionByZero")) do
                 reciprocal(0)
             end
         end
