@@ -2,8 +2,10 @@ include("../../Exceptional.jl")
 
 struct DivisionByZero <: Exception end
 
-mystery(n) = if n % 2 == 0
-                invoke_restart(:return_value, n)
+mystery(n) = if n % 3 == 0
+                9 + invoke_restart(:return_zero)
+            elseif n % 3 == 1
+                invoke_restart(:return_value, 9+n)
             else
                 invoke_restart(:skip)
                 + 1
@@ -15,11 +17,12 @@ veryMystery(n) = with_restart(:return_zero => () -> 0,
         mystery(n)
     end
 
-@assert veryMystery(2) == 2
-@assert veryMystery(4) == 4
-
-@assert veryMystery(1) == 1
-@assert veryMystery(3) == 1
+@assert veryMystery(0) == 0
+@assert veryMystery(1) == 10
+@assert veryMystery(2) === nothing
+@assert veryMystery(3) == 0
+@assert veryMystery(4) == 13
+@assert veryMystery(5) === nothing
 
 #=
 output:

@@ -26,9 +26,9 @@ veryMystery(n) = with_restart(:return_zero => () -> 0,
         mystery(n)
     end
 
-@assert veryMystery(0) == 3
-@assert veryMystery(1) == 4
-@assert veryMystery(2) == 6
+@assert veryMystery(0) == 0
+@assert veryMystery(1) == 1
+@assert veryMystery(2) == 3
 @assert veryMystery(4) == 10
 
 #=

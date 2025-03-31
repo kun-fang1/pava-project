@@ -12,8 +12,8 @@ reciprocal(value) =
 
 a2 = to_escape() do leave
         handling(DivisionByZero => (c) -> invoke_restart(:leave, 9)) do
-            reciprocal(0)
+            reciprocal(0) + reciprocal(10)
         end
     end
-
+println("a2 = ", a2)
 @assert a2 == 9
