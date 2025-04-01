@@ -18,18 +18,25 @@ chain(n) = 1 +
 foo(n) = handling(ExcTwo => (c) -> invoke_restart(:try_again, 3)) do
             handling(ExcOne => (c) -> invoke_restart(:try_again, 2)) do
                 handling(ExcZero => (c) -> invoke_restart(:try_again, 1)) do
-                        with_restart(:return_zero => () -> 0,
-                            :return_value => identity,
-                            :try_again => chain,
-                            :retry_plusOne => (x) -> x+1) do
-                            chain(n)
+                    with_restart(:return_zero => () -> 0,
+                        :return_value => identity,
+                        :try_again => chain,
+                        :retry_plusOne => (x) -> x+1) do
+                        chain(n)
                     end
                 end
             end
         end
 
-@assert foo(0) == 2
+try
+    foo(0)
+catch e
+    if !isa(e, ExcOne)
+        rethrow(e)
+    end
+end
 
 #=
 output:
+(ERROR: LoadError: ExcOne())
 =#

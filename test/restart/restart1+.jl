@@ -16,7 +16,6 @@ a1 = to_escape() do leave
         end
     end
 end
-
 @assert a1 == 9.1
 
 a2 = to_escape() do leave
@@ -26,5 +25,4 @@ a2 = to_escape() do leave
             end
         end
     end
-println("a2 = ", a2)
 @assert a2 == 9

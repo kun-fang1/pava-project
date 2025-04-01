@@ -22,7 +22,7 @@ handling(LineEndLimit => (c) -> println(),
 end
 
 to_escape() do exit
-    handling(LineEndLimit => (c) -> exit(),
+    handling(LineEndLimit => (c) -> exit(1),
                 EndText => (c) -> println("END!")) do
         print_line("Hi, everybody! How are you feeling today?\n")
     end

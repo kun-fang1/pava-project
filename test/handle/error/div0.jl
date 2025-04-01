@@ -12,10 +12,17 @@ function divZero_error(x)
     end
 end
 
-handling(DivisionByZero => (c)->println("I saw it too")) do
-    handling(DivisionByZero => (c)->println("I saw a division by zero")) do
-        divZero_error(0)
-        divZero_error(1)
+
+try
+    handling(DivisionByZero => (c)->println("I saw it too")) do
+        handling(DivisionByZero => (c)->println("I saw a division by zero")) do
+            divZero_error(0)
+            divZero_error(1)
+        end
+    end
+catch e
+    if !isa(e, DivisionByZero)
+        rethrow(e)
     end
 end
 
@@ -23,5 +30,4 @@ end
 output:
 I saw a division by zero
 I saw it too
-(ERROR: LoadError: DivisionByZero())
 =#
