@@ -34,6 +34,7 @@ function handling(func, handlers...)
     try
         ret = func()
     catch e
+        popfirst!(HANDLERS_LIST)
         rethrow()
     finally
         popfirst!(HANDLERS_LIST)
