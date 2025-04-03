@@ -11,8 +11,8 @@ struct RestartException <: Exception
 end
 
 # Constants
-const HANDLERS_LIST = [] # FIFO: list of lists
-const RESTARTS_LIST = [] # FIFO: list of lists
+const HANDLERS_LIST = [] # FIFO: list of tuples
+const RESTARTS_LIST = [] # FIFO: list of tuples
 
 # Functions
 function to_escape(func)
@@ -34,7 +34,6 @@ function handling(func, handlers...)
     try
         ret = func()
     catch e
-        popfirst!(HANDLERS_LIST)
         rethrow()
     finally
         popfirst!(HANDLERS_LIST)
@@ -63,12 +62,11 @@ function with_restart(func, restarts...)
 
         # restart token not Found || is not a RestartException
         if callback === nothing
-            popfirst!(RESTARTS_LIST)
             rethrow()
         end
     finally
+        popfirst!(RESTARTS_LIST)
         if callback !== nothing
-            popfirst!(RESTARTS_LIST)
             ret = callback(args...)
         end
     end
@@ -100,10 +98,14 @@ function invoke_restart(name, args...)
 end
 
 function signal(exception)
+    ret = nothing
     for handlers in HANDLERS_LIST
         for (e_type, func) in handlers
             if isa(exception, e_type)
-                func(exception)
+                ret = func(exception)
+                if ret !== nothing
+                    return ret
+                end
             end
         end
     end

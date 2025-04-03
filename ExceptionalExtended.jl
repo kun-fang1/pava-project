@@ -52,7 +52,6 @@ function handling(func, handlers...)
     try
         ret = func()
     catch e
-        popfirst!(HANDLERS_LIST)
         rethrow()
     finally
         popfirst!(HANDLERS_LIST)
@@ -79,18 +78,15 @@ function with_restart(func, restarts...)
                     break
                 end
             end
-            
         else
-            for _ in 1:length(restarts)
-                popfirst!(RESTARTS_LIST)
-            end
             rethrow()
         end
     finally
+        for _ in 1:length(restarts)
+            popfirst!(RESTARTS_LIST)
+        end
+
         if restart_chosen !== nothing
-            for _ in 1:length(restarts)
-                popfirst!(RESTARTS_LIST)
-            end
             args = restart_chosen.interactive()
             ret = restart_chosen.callback(args...)
         end
@@ -144,10 +140,14 @@ function invoke_restart()
 end
 
 function signal(exception)
+    ret = nothing
     for handlers in HANDLERS_LIST
         for (e_type, func) in handlers
             if isa(exception, e_type)
-                func(exception)
+                ret = func(exception)
+                if ret !== nothing
+                    return ret
+                end
             end
         end
     end
