@@ -20,7 +20,8 @@ end
 
 function Restart(
     token::Symbol, callback::Function;
-    test::Function = () -> true, interactive::Function = () -> [], report::Any = "No report available")
+    test::Function = () -> true, interactive::Function = () -> [], 
+    report::Any = "No report available")
     RestartStruct(token, callback, test, interactive, report)
 end
 
@@ -154,16 +155,9 @@ function signal(exception)
 end
 
 function error(exception)
-    ret = nothing
-    for handlers in HANDLERS_LIST
-        for (e_type, func) in handlers
-            if isa(exception, e_type)
-                ret = func(exception)
-                if ret !== nothing
-                    return ret
-                end
-            end
-        end
+    ret = signal(exception)
+    if ret !== nothing
+        return ret
     end
     throw(exception)
 end
